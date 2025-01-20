@@ -49,7 +49,7 @@ enum rgb_underglow_effect {
     UNDERGLOW_EFFECT_BREATHE,
     UNDERGLOW_EFFECT_SPECTRUM,
     UNDERGLOW_EFFECT_SWIRL,
-    UNDERGLOW_EFFECT_GRADIENT,
+    UNDERGLOW_EFFECT_RIPPL,
     UNDERGLOW_EFFECT_NUMBER // Used to track number of underglow effects
 };
 
@@ -131,25 +131,18 @@ static struct led_rgb hsb_to_rgb(struct zmk_led_hsb hsb) {
     return rgb;
 }
 
-static void zmk_rgb_underglow_effect_gradient(void) {
-    float progress = (float)state.animation_step / 1000.0;
-    if (progress > 1.0) {
-        progress = 1.0;
-    }
 
-    uint8_t r = (1.0 - progress) * 255;
-    uint8_t g = progress * 255;
-
-    for (int i = 0; i < STRIP_NUM_PIXELS; i++) {
+static void zmk_rgb_underglow_effect_rippl(void) {
+    int num_pixels = STRIP_NUM_PIXELS;
+    for (int i = 0; i < num_pixels; i++) {
         struct zmk_led_hsb hsb = state.color;
-        hsb.h = (r + g) / 2;
-        hsb.s = SAT_MAX;
-        hsb.b = BRT_MAX;
+        int brightness = abs(state.animation_step - (i * 100)) / 100;
+        brightness = (brightness > 255) ? 255 : brightness; 
+        hsb.b = brightness;
         pixels[i] = hsb_to_rgb(hsb_scale_zero_max(hsb));
     }
-
-    state.animation_step++;
-    if (state.animation_step > 1000) {
+    state.animation_step += state.animation_speed * 10;
+    if (state.animation_step > num_pixels) {
         state.animation_step = 0;
     }
 }
@@ -213,7 +206,7 @@ static void zmk_rgb_underglow_tick(struct k_work *work) {
     case UNDERGLOW_EFFECT_SWIRL:
         zmk_rgb_underglow_effect_swirl();
         break;
-    case UNDERGLOW_EFFECT_GRADIENT:
+    case UNDERGLOW_EFFECT_RIPPL:
         zmk_rgb_underglow_effect_gradient();
         break;
     }
