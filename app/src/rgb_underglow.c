@@ -136,13 +136,15 @@ static void zmk_rgb_underglow_effect_rippl(void) {
     int num_pixels = STRIP_NUM_PIXELS;
     for (int i = 0; i < num_pixels; i++) {
         struct zmk_led_hsb hsb = state.color;
-        int brightness = abs(state.animation_step - (i * 100)) / 100;
-        brightness = (brightness > 255) ? 255 : brightness; 
-        hsb.b = brightness;
+        if (i == state.animation_step) {
+            hsb.b = 255;
+        } else {
+            hsb.b = 0;
+        }
         pixels[i] = hsb_to_rgb(hsb_scale_zero_max(hsb));
     }
-    state.animation_step += state.animation_speed * 10;
-    if (state.animation_step > num_pixels) {
+    state.animation_step++;
+    if (state.animation_step >= num_pixels) {
         state.animation_step = 0;
     }
 }
