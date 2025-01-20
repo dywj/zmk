@@ -207,7 +207,7 @@ static void zmk_rgb_underglow_tick(struct k_work *work) {
         zmk_rgb_underglow_effect_swirl();
         break;
     case UNDERGLOW_EFFECT_RIPPL:
-        zmk_rgb_underglow_effect_gradient();
+        zmk_rgb_underglow_effect_rippl();
         break;
     }
 
